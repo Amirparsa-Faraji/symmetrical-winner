@@ -61,61 +61,67 @@ public class StatementPrinter {
     }
 
     private int amountFor(final Play play, final int audience) {
+        int result = 0;
         switch (play.getType()) {
             case TYPE_TRAGEDY:
-                int tragedy = Constants.TRAGEDY_BASE_AMOUNT;
+                result = Constants.TRAGEDY_BASE_AMOUNT;
                 if (audience > Constants.TRAGEDY_AUDIENCE_THRESHOLD) {
-                    tragedy += Constants.TRAGEDY_OVER_BASE_CAPACITY_PER_PERSON
+                    result += Constants.TRAGEDY_OVER_BASE_CAPACITY_PER_PERSON
                             * (audience - Constants.TRAGEDY_AUDIENCE_THRESHOLD);
                 }
-                return tragedy;
+                break;
             case TYPE_COMEDY:
-                int comedy = Constants.COMEDY_BASE_AMOUNT;
+                result = Constants.COMEDY_BASE_AMOUNT;
                 if (audience > Constants.COMEDY_AUDIENCE_THRESHOLD) {
-                    comedy += Constants.COMEDY_OVER_BASE_CAPACITY_AMOUNT
+                    result += Constants.COMEDY_OVER_BASE_CAPACITY_AMOUNT
                             + (Constants.COMEDY_OVER_BASE_CAPACITY_PER_PERSON
                             * (audience - Constants.COMEDY_AUDIENCE_THRESHOLD));
                 }
-                comedy += Constants.COMEDY_AMOUNT_PER_AUDIENCE * audience;
-                return comedy;
+                result += Constants.COMEDY_AMOUNT_PER_AUDIENCE * audience;
+                break;
             case TYPE_HISTORY:
-                int history = Constants.HISTORY_BASE_AMOUNT;
+                result = Constants.HISTORY_BASE_AMOUNT;
                 if (audience > Constants.HISTORY_AUDIENCE_THRESHOLD) {
-                    history += Constants.HISTORY_OVER_BASE_CAPACITY_PER_PERSON
+                    result += Constants.HISTORY_OVER_BASE_CAPACITY_PER_PERSON
                             * (audience - Constants.HISTORY_AUDIENCE_THRESHOLD);
                 }
-                return history;
+                break;
             case TYPE_PASTORAL:
-                int pastoral = Constants.PASTORAL_BASE_AMOUNT;
+                result = Constants.PASTORAL_BASE_AMOUNT;
                 if (audience > Constants.PASTORAL_AUDIENCE_THRESHOLD) {
-                    pastoral += Constants.PASTORAL_OVER_BASE_CAPACITY_PER_PERSON
+                    result += Constants.PASTORAL_OVER_BASE_CAPACITY_PER_PERSON
                             * (audience - Constants.PASTORAL_AUDIENCE_THRESHOLD);
                 }
-                return pastoral;
+                break;
             default:
                 throw new RuntimeException(String.format("unknown type: %s", play.getType()));
         }
+        return result;
     }
 
     private int baseThresholdFor(final Play play) {
+        int threshold = Constants.BASE_VOLUME_CREDIT_THRESHOLD;
         switch (play.getType()) {
             case TYPE_HISTORY:
-                return Constants.HISTORY_VOLUME_CREDIT_THRESHOLD;
+                threshold = Constants.HISTORY_VOLUME_CREDIT_THRESHOLD;
+                break;
             case TYPE_PASTORAL:
-                return Constants.PASTORAL_VOLUME_CREDIT_THRESHOLD;
+                threshold = Constants.PASTORAL_VOLUME_CREDIT_THRESHOLD;
+                break;
             default:
-                return Constants.BASE_VOLUME_CREDIT_THRESHOLD;
+                break;
         }
+        return threshold;
     }
 
     private int extraVolumeCredits(final Play play, final int audience) {
+        int extra = 0;
         if (TYPE_COMEDY.equals(play.getType())) {
-            return audience / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+            extra = audience / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+        } else if (TYPE_PASTORAL.equals(play.getType())) {
+            extra = audience / PASTORAL_EXTRA_VOLUME_DIVISOR;
         }
-        if (TYPE_PASTORAL.equals(play.getType())) {
-            return audience / PASTORAL_EXTRA_VOLUME_DIVISOR;
-        }
-        return 0;
+        return extra;
     }
 
     // ---- Accessors (if needed elsewhere) ----
