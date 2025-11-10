@@ -11,7 +11,7 @@ public final class Constants {
 
     // comedy amount constants
     public static final int COMEDY_AMOUNT_PER_AUDIENCE = 300;
-    public static final int COMEDY_AUDIENCE_THRESHOLD = 20; // modifier order fixed
+    public static final int COMEDY_AUDIENCE_THRESHOLD = 20;
     public static final int COMEDY_BASE_AMOUNT = 30000;
     public static final int COMEDY_OVER_BASE_CAPACITY_AMOUNT = 10000;
     public static final int COMEDY_OVER_BASE_CAPACITY_PER_PERSON = 500;

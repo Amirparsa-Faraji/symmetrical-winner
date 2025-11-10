@@ -92,32 +92,60 @@ public class StatementPrinter {
 
     // ===== Temporary empty stubs to satisfy existence checks (do not remove) =====
 
-    /** Returns the Play for a given performance (stub). */
+    /**
+     * Returns the {@link Play} for a given performance.
+     *
+     * @param performance the performance whose play is requested
+     * @return the play for the performance, or {@code null} (stub)
+     */
     private Play getPlay(final Performance performance) {
         return null;
     }
 
-    /** Returns the base amount in cents for a performance (stub). */
+    /**
+     * Calculates the base amount for a performance, in cents.
+     *
+     * @param performance the performance to evaluate
+     * @return the amount in cents (stub returns 0)
+     */
     private int getAmount(final Performance performance) {
         return 0;
     }
 
-    /** Returns the volume credits for a performance (stub). */
+    /**
+     * Calculates the volume credits contributed by a performance.
+     *
+     * @param performance the performance to evaluate
+     * @return the number of credits (stub returns 0)
+     */
     private int getVolumeCredits(final Performance performance) {
         return 0;
     }
 
-    /** Formats an amount (in cents) to US currency (stub). */
+    /**
+     * Formats a cent amount as a US currency string.
+     *
+     * @param amountInCents the amount in cents to format
+     * @return a formatted currency string (stub returns empty string)
+     */
     private String usd(final int amountInCents) {
         return "";
     }
 
-    /** Returns the total amount in cents across all performances (stub). */
+    /**
+     * Computes the total amount across all performances, in cents.
+     *
+     * @return total amount in cents (stub returns 0)
+     */
     private int getTotalAmount() {
         return 0;
     }
 
-    /** Returns the total volume credits across all performances (stub). */
+    /**
+     * Computes the total volume credits across all performances.
+     *
+     * @return total volume credits (stub returns 0)
+     */
     private int getTotalVolumeCredits() {
         return 0;
     }
