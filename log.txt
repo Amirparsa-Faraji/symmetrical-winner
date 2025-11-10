@@ -1,0 +1,22 @@
+907944b Task 2.4: placeholder
+9096996 Task 2.3: placeholder
+8700996 Task 2.2: placeholder
+e445d08 Task 2.1: placeholder
+63cb3cc Task 1.2: placeholder
+59d4c4f Task 1.1
+98aa787 Task 1.2
+2ea6a7f Task 2.1
+1e33725 Task 2.2
+7fd91d0 Task 2.3
+efb57d2 Task 2.4
+4b25daa Task 2.4
+a91a9be Task 2.3
+1853217 Task 2.2
+c5f4e58 Task 2.1
+5f29a7f Task 1.2
+41446cf Task 1.1
+fe236e0 2.4
+cc05cf9 2.1
+de856da Task 1.2
+98a19fe Task 1.1
+a5e9635 Initial commit
