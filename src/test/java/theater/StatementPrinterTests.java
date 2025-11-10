@@ -58,7 +58,6 @@ public class StatementPrinterTests {
             StatementPrinter statementPrinter = new StatementPrinter(invoice, plays);
             String result = statementPrinter.statement();
 
-            // ensure consistent line endings are being used
             result = result.replace("\r\n", "\n");
             expected = expected.replace("\r\n", "\n");
 
