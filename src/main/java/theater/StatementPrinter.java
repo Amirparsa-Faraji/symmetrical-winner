@@ -31,6 +31,7 @@ public class StatementPrinter {
                 new StringBuilder("Statement for " + invoice.getCustomer() + System.lineSeparator());
 
         final NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
+        final int pastoralExtraVolumeDivisor = 2; // named constant to avoid magic number
 
         for (Performance p : invoice.getPerformances()) {
             final Play play = plays.get(p.getPlayID());
@@ -53,17 +54,43 @@ public class StatementPrinter {
                     }
                     thisAmount += Constants.COMEDY_AMOUNT_PER_AUDIENCE * p.getAudience();
                     break;
+                case "history":
+                    thisAmount = Constants.HISTORY_BASE_AMOUNT;
+                    if (p.getAudience() > Constants.HISTORY_AUDIENCE_THRESHOLD) {
+                        thisAmount += Constants.HISTORY_OVER_BASE_CAPACITY_PER_PERSON
+                                * (p.getAudience() - Constants.HISTORY_AUDIENCE_THRESHOLD);
+                    }
+                    break;
+                case "pastoral":
+                    thisAmount = Constants.PASTORAL_BASE_AMOUNT;
+                    if (p.getAudience() > Constants.PASTORAL_AUDIENCE_THRESHOLD) {
+                        thisAmount += Constants.PASTORAL_OVER_BASE_CAPACITY_PER_PERSON
+                                * (p.getAudience() - Constants.PASTORAL_AUDIENCE_THRESHOLD);
+                    }
+                    break;
                 default:
                     throw new RuntimeException(String.format("unknown type: %s", play.getType()));
             }
 
-            // add volume credits
-            volumeCredits += Math.max(
-                    p.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+            // ---- volume credits per type ----
+            final int baseThreshold;
+            switch (play.getType()) {
+                case "history":
+                    baseThreshold = Constants.HISTORY_VOLUME_CREDIT_THRESHOLD;
+                    break;
+                case "pastoral":
+                    baseThreshold = Constants.PASTORAL_VOLUME_CREDIT_THRESHOLD;
+                    break;
+                default: // tragedy & comedy use the 30 threshold
+                    baseThreshold = Constants.BASE_VOLUME_CREDIT_THRESHOLD;
+                    break;
+            }
+            volumeCredits += Math.max(p.getAudience() - baseThreshold, 0);
 
-            // add extra credit for every five comedy attendees
             if ("comedy".equals(play.getType())) {
                 volumeCredits += p.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+            } else if ("pastoral".equals(play.getType())) {
+                volumeCredits += p.getAudience() / pastoralExtraVolumeDivisor;
             }
 
             // print line for this order
@@ -81,7 +108,7 @@ public class StatementPrinter {
         return result.toString();
     }
 
-    // ---- Accessors (useful if other code needs them later) ----
+    // ---- Accessors (if needed elsewhere) ----
     public Invoice getInvoice() {
         return invoice;
     }
