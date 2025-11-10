@@ -9,6 +9,12 @@ import java.util.Map;
  */
 public class StatementPrinter {
 
+    private static final String TYPE_TRAGEDY = "tragedy";
+    private static final String TYPE_COMEDY = "comedy";
+    private static final String TYPE_HISTORY = "history";
+    private static final String TYPE_PASTORAL = "pastoral";
+    private static final int PASTORAL_EXTRA_VOLUME_DIVISOR = 2;
+
     private final Invoice invoice;
     private final Map<String, Play> plays;
 
@@ -29,75 +35,21 @@ public class StatementPrinter {
 
         final StringBuilder result =
                 new StringBuilder("Statement for " + invoice.getCustomer() + System.lineSeparator());
-
         final NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
-        final int pastoralExtraVolumeDivisor = 2; // named constant to avoid magic number
 
         for (Performance p : invoice.getPerformances()) {
             final Play play = plays.get(p.getPlayID());
+            final int audience = p.getAudience();
 
-            int thisAmount = 0;
-            switch (play.getType()) {
-                case "tragedy":
-                    thisAmount = Constants.TRAGEDY_BASE_AMOUNT;
-                    if (p.getAudience() > Constants.TRAGEDY_AUDIENCE_THRESHOLD) {
-                        thisAmount += Constants.TRAGEDY_OVER_BASE_CAPACITY_PER_PERSON
-                                * (p.getAudience() - Constants.TRAGEDY_AUDIENCE_THRESHOLD);
-                    }
-                    break;
-                case "comedy":
-                    thisAmount = Constants.COMEDY_BASE_AMOUNT;
-                    if (p.getAudience() > Constants.COMEDY_AUDIENCE_THRESHOLD) {
-                        thisAmount += Constants.COMEDY_OVER_BASE_CAPACITY_AMOUNT
-                                + (Constants.COMEDY_OVER_BASE_CAPACITY_PER_PERSON
-                                * (p.getAudience() - Constants.COMEDY_AUDIENCE_THRESHOLD));
-                    }
-                    thisAmount += Constants.COMEDY_AMOUNT_PER_AUDIENCE * p.getAudience();
-                    break;
-                case "history":
-                    thisAmount = Constants.HISTORY_BASE_AMOUNT;
-                    if (p.getAudience() > Constants.HISTORY_AUDIENCE_THRESHOLD) {
-                        thisAmount += Constants.HISTORY_OVER_BASE_CAPACITY_PER_PERSON
-                                * (p.getAudience() - Constants.HISTORY_AUDIENCE_THRESHOLD);
-                    }
-                    break;
-                case "pastoral":
-                    thisAmount = Constants.PASTORAL_BASE_AMOUNT;
-                    if (p.getAudience() > Constants.PASTORAL_AUDIENCE_THRESHOLD) {
-                        thisAmount += Constants.PASTORAL_OVER_BASE_CAPACITY_PER_PERSON
-                                * (p.getAudience() - Constants.PASTORAL_AUDIENCE_THRESHOLD);
-                    }
-                    break;
-                default:
-                    throw new RuntimeException(String.format("unknown type: %s", play.getType()));
-            }
+            final int thisAmount = amountFor(play, audience);
 
-            // ---- volume credits per type ----
-            final int baseThreshold;
-            switch (play.getType()) {
-                case "history":
-                    baseThreshold = Constants.HISTORY_VOLUME_CREDIT_THRESHOLD;
-                    break;
-                case "pastoral":
-                    baseThreshold = Constants.PASTORAL_VOLUME_CREDIT_THRESHOLD;
-                    break;
-                default: // tragedy & comedy use the 30 threshold
-                    baseThreshold = Constants.BASE_VOLUME_CREDIT_THRESHOLD;
-                    break;
-            }
-            volumeCredits += Math.max(p.getAudience() - baseThreshold, 0);
+            volumeCredits += Math.max(audience - baseThresholdFor(play), 0);
+            volumeCredits += extraVolumeCredits(play, audience);
 
-            if ("comedy".equals(play.getType())) {
-                volumeCredits += p.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-            } else if ("pastoral".equals(play.getType())) {
-                volumeCredits += p.getAudience() / pastoralExtraVolumeDivisor;
-            }
-
-            // print line for this order
             result.append(String.format("  %s: %s (%s seats)%n",
                     play.getName(),
                     frmt.format(thisAmount / (double) Constants.PERCENT_FACTOR),
-                    p.getAudience()));
+                    audience));
 
             totalAmount += thisAmount;
         }
@@ -106,6 +58,64 @@ public class StatementPrinter {
                 frmt.format(totalAmount / (double) Constants.PERCENT_FACTOR)));
         result.append(String.format("You earned %s credits%n", volumeCredits));
         return result.toString();
+    }
+
+    private int amountFor(final Play play, final int audience) {
+        switch (play.getType()) {
+            case TYPE_TRAGEDY:
+                int tragedy = Constants.TRAGEDY_BASE_AMOUNT;
+                if (audience > Constants.TRAGEDY_AUDIENCE_THRESHOLD) {
+                    tragedy += Constants.TRAGEDY_OVER_BASE_CAPACITY_PER_PERSON
+                            * (audience - Constants.TRAGEDY_AUDIENCE_THRESHOLD);
+                }
+                return tragedy;
+            case TYPE_COMEDY:
+                int comedy = Constants.COMEDY_BASE_AMOUNT;
+                if (audience > Constants.COMEDY_AUDIENCE_THRESHOLD) {
+                    comedy += Constants.COMEDY_OVER_BASE_CAPACITY_AMOUNT
+                            + (Constants.COMEDY_OVER_BASE_CAPACITY_PER_PERSON
+                            * (audience - Constants.COMEDY_AUDIENCE_THRESHOLD));
+                }
+                comedy += Constants.COMEDY_AMOUNT_PER_AUDIENCE * audience;
+                return comedy;
+            case TYPE_HISTORY:
+                int history = Constants.HISTORY_BASE_AMOUNT;
+                if (audience > Constants.HISTORY_AUDIENCE_THRESHOLD) {
+                    history += Constants.HISTORY_OVER_BASE_CAPACITY_PER_PERSON
+                            * (audience - Constants.HISTORY_AUDIENCE_THRESHOLD);
+                }
+                return history;
+            case TYPE_PASTORAL:
+                int pastoral = Constants.PASTORAL_BASE_AMOUNT;
+                if (audience > Constants.PASTORAL_AUDIENCE_THRESHOLD) {
+                    pastoral += Constants.PASTORAL_OVER_BASE_CAPACITY_PER_PERSON
+                            * (audience - Constants.PASTORAL_AUDIENCE_THRESHOLD);
+                }
+                return pastoral;
+            default:
+                throw new RuntimeException(String.format("unknown type: %s", play.getType()));
+        }
+    }
+
+    private int baseThresholdFor(final Play play) {
+        switch (play.getType()) {
+            case TYPE_HISTORY:
+                return Constants.HISTORY_VOLUME_CREDIT_THRESHOLD;
+            case TYPE_PASTORAL:
+                return Constants.PASTORAL_VOLUME_CREDIT_THRESHOLD;
+            default:
+                return Constants.BASE_VOLUME_CREDIT_THRESHOLD;
+        }
+    }
+
+    private int extraVolumeCredits(final Play play, final int audience) {
+        if (TYPE_COMEDY.equals(play.getType())) {
+            return audience / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+        }
+        if (TYPE_PASTORAL.equals(play.getType())) {
+            return audience / PASTORAL_EXTRA_VOLUME_DIVISOR;
+        }
+        return 0;
     }
 
     // ---- Accessors (if needed elsewhere) ----
