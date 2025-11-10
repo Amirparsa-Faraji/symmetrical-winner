@@ -65,32 +65,29 @@ public class StatementPrinter {
         result.append(String.format("You earned %s credits%n", volumeCredits));
         return result.toString();
     }
+
+
+    private Play getPlay(final Performance performance) {
+        return null;
+    }
+
+    private int getAmount(final Performance performance) {
+        return 0;
+    }
+
+    private int getVolumeCredits(final Performance performance) {
+        return 0;
+    }
+
+    private String usd(final int amountInCents) {
+        return "";
+    }
+
+    private int getTotalAmount() {
+        return 0;
+    }
+
+    private int getTotalVolumeCredits() {
+        return 0;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
