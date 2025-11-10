@@ -118,7 +118,8 @@ public class StatementPrinter {
         int extra = 0;
         if (TYPE_COMEDY.equals(play.getType())) {
             extra = audience / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-        } else if (TYPE_PASTORAL.equals(play.getType())) {
+        }
+        else if (TYPE_PASTORAL.equals(play.getType())) {
             extra = audience / PASTORAL_EXTRA_VOLUME_DIVISOR;
         }
         return extra;
